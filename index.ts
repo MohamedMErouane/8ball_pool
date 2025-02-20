@@ -1,5 +1,5 @@
-import { Middleware } from "polymatic";
+import { Runtime } from "polymatic";
 
-import { Main } from "./src/Main";
+import { Main, MainContext } from "./src/Main";
 
-Middleware.activate(new Main(), {});
+Runtime.activate(new Main(), new MainContext());

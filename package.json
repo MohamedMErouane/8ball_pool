@@ -1,15 +1,14 @@
 {
-  "name": "eightball",
+  "name": "polymatic-eight-ball",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.14",
     "@types/node": "^22.10.7",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.20.0",
@@ -21,9 +20,7 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "dependencies": {
-    "lodash": "^4.17.21",
     "planck": "^1.3.0",
-    "polymatic": "workspace:*",
-    "stage-js": "1.0.0-alpha.16"
+    "polymatic": "^0.0.5"
   }
 }

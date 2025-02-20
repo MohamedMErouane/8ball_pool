@@ -1,30 +1,30 @@
-import { World } from "planck/with-testbed";
-
 import { Middleware } from "polymatic";
 
-import { Ball, Physics, Pocket, Rail } from "./Physics";
-import { BilliardTableData, BLACK, WHITE } from "./Table";
-import { Terminal } from "./Terminal";
+import { Ball, CueStick, Pocket, Rail, Table } from "./Data";
+import { PoolTable } from "./PoolTable";
 import { EightBall } from "./EightBall";
+import { Terminal } from "./Terminal";
+import { FrameLoop } from "./FrameLoop";
+import { CueShot } from "./CueShot";
+import { Physics } from "./Physics";
 
-export interface MainContext {
-  // game data
+export class MainContext {
+  cue: CueStick | null;
   balls: Ball[];
   rails: Rail[];
   pockets: Pocket[];
 
-  // physics world
-  world: World;
-
-  // table geometry
-  table: BilliardTableData;
+  table: Table;
 }
 
 export class Main extends Middleware<MainContext> {
   constructor() {
     super();
+    this.use(new FrameLoop());
+    this.use(new PoolTable());
     this.use(new EightBall());
     this.use(new Physics());
+    this.use(new CueShot());
     this.use(new Terminal());
   }
 }

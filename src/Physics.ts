@@ -1,53 +1,52 @@
-import { World, Circle, Polygon, Vec2Value, Contact, Body } from "planck/with-testbed";
-
-import { STYLES } from "./Table";
+import { World, Circle, Polygon, Vec2Value, Contact, Body, Settings } from "planck";
 
 import { Dataset, Driver, Middleware } from "polymatic";
+
 import { MainContext } from "./Main";
-
-export interface Ball {
-  type: "ball";
-  key: string;
-  position: { x: number; y: number };
-  radius: number;
-  color: string;
-}
-
-export interface Rail {
-  type: "rail";
-  key: string;
-  vertices: Vec2Value[] | undefined;
-}
-
-export interface Pocket {
-  type: "pocket";
-  key: string;
-  position: { x: number; y: number };
-  radius: number;
-}
+import { FrameLoopEvent } from "./FrameLoop";
+import { Ball, Pocket, Rail } from "./Data";
 
 export type Entity = Ball | Rail | Pocket;
 
+/**
+ * Billiards physics simulation. This doesn't include any game rules, or table geometry.
+ */
 export class Physics extends Middleware<MainContext> {
   world: World;
+
+  time: number = 0;
+  timeStep = 1000 / 60;
 
   constructor() {
     super();
     this.on("activate", this.setup);
-    this.on("update", this.update);
+    this.on("frame-loop", this.handleFrameLoop);
+    this.on("cue-shot", this.handleCueShot);
+
     this.dataset.addDriver(this.ballDriver);
     this.dataset.addDriver(this.railDriver);
     this.dataset.addDriver(this.pocketDriver);
   }
 
-  setup() {
-    this.world = new World();
-    this.world.on("begin-contact", this.collide);
-    this.context.world = this.world;
+  handleCueShot(data: { ball: Ball; shot: Vec2Value }) {
+    const body = this.ballDriver.ref(data.ball.key);
+    if (!body) return;
+    body.applyLinearImpulse(data.shot, body.getPosition());
   }
 
-  update() {
+  setup() {
+    Settings.velocityThreshold = 0;
+    this.world = new World();
+    this.world.on("begin-contact", this.collide);
+  }
+
+  handleFrameLoop(ev: FrameLoopEvent) {
     this.dataset.data([...this.context.balls, ...this.context.rails, ...this.context.pockets]);
+    this.time += ev.dt;
+    while (this.time >= this.timeStep) {
+      this.time -= this.timeStep;
+      this.world.step(this.timeStep / 1000);
+    }
   }
 
   collide = (contact: Contact) => {
@@ -85,19 +84,20 @@ export class Physics extends Middleware<MainContext> {
         angularDamping: 1,
         userData: data,
       });
-      const color = data.color;
-      const style = color && STYLES[color];
       body.createFixture({
         shape: new Circle(data.radius),
         friction: 0.1,
         restitution: 0.99,
         density: 1,
         userData: data,
-        style,
       });
       return body;
     },
-    update: (data, body) => {},
+    update: (data, body) => {
+      const p = body.getPosition();
+      data.position.x = p.x;
+      data.position.y = p.y;
+    },
     exit: (data, body) => {
       this.world.destroyBody(body);
     },
