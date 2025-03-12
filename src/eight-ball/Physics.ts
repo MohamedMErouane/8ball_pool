@@ -1,21 +1,19 @@
-import { World, Circle, Polygon, Vec2Value, Contact, Body, Settings } from "planck";
+import { World, Circle, Polygon, type Vec2Value, Contact, Body, Settings } from "planck";
 
 import { Dataset, Driver, Middleware } from "polymatic";
 
-import { MainContext } from "./Main";
-import { FrameLoopEvent } from "./FrameLoop";
-import { Ball, Pocket, Rail } from "./Data";
+import { Ball, Pocket, Rail, type BilliardContext } from "./Data";
 
 export type Entity = Ball | Rail | Pocket;
 
 /**
  * Billiards physics simulation. This doesn't include any game rules, or table geometry.
  */
-export class Physics extends Middleware<MainContext> {
+export class Physics extends Middleware<BilliardContext> {
   world: World;
 
   time: number = 0;
-  timeStep = 1000 / 60;
+  timeStep = 1000 / 20;
 
   constructor() {
     super();
@@ -31,7 +29,9 @@ export class Physics extends Middleware<MainContext> {
   handleCueShot(data: { ball: Ball; shot: Vec2Value }) {
     const body = this.ballDriver.ref(data.ball.key);
     if (!body) return;
+    this.context.sleep = false;
     body.applyLinearImpulse(data.shot, body.getPosition());
+    // this.pause = 5000;
   }
 
   setup() {
@@ -40,12 +40,22 @@ export class Physics extends Middleware<MainContext> {
     this.world.on("begin-contact", this.collide);
   }
 
-  handleFrameLoop(ev: FrameLoopEvent) {
-    this.dataset.data([...this.context.balls, ...this.context.rails, ...this.context.pockets]);
+  handleFrameLoop(ev: { dt: number }) {
+    if (!this.context.balls || !this.context.rails || !this.context.pockets) return;
+    this.dataset.data([...this.context?.balls, ...this.context?.rails, , ...this.context?.pockets]);
     this.time += ev.dt;
     while (this.time >= this.timeStep) {
       this.time -= this.timeStep;
+
+      if (this.context.sleep) continue;
       this.world.step(this.timeStep / 1000);
+
+      this.context.sleep = true;
+      for (let b = this.world.getBodyList(); b; b = b.getNext()) {
+        if (b.isAwake() && !b.isStatic()) {
+          this.context.sleep = false;
+        }
+      }
     }
   }
 

@@ -1,12 +1,11 @@
 import { Middleware } from "polymatic";
 
-import { MainContext } from "./Main";
-import { CueStick, Point } from "./Data";
+import { CueStick, type BilliardContext } from "./Data";
 
 /**
  * Implements cue stick shot. It listens to user pointer input events from Terminal, and updates the cue object in the context, and sends cue-shot events.
  */
-export class CueShot extends Middleware<MainContext> {
+export class CueShot extends Middleware<BilliardContext> {
   constructor() {
     super();
     this.on("user-pointer-start", this.handlePointerStart);
@@ -16,13 +15,15 @@ export class CueShot extends Middleware<MainContext> {
   }
 
   handleFrameLoop() {
-    if (!this.context.cue) return;
     const cue = this.context.cue;
+    if (!cue || !cue.ball) return;
     cue.start.x = cue.ball.position.x;
     cue.start.y = cue.ball.position.y;
   }
 
-  handlePointerStart(point: Point) {
+  handlePointerStart(point: { x: number; y: number }) {
+    console.log("cue-shot", this.context.turn, this.context.player);
+    if (this.context.turn && this.context.turn !== this.context.player) return;
     const ball = this.context.balls.find((ball) => ball.color === "white");
     if (!ball) return;
     const cue = new CueStick();
@@ -36,18 +37,18 @@ export class CueShot extends Middleware<MainContext> {
     this.context.cue = cue;
   }
 
-  handlePointerMove(point: Point) {
-    if (!this.context.cue) return;
+  handlePointerMove(point: { x: number; y: number }) {
     const cue = this.context.cue;
+    if (!cue) return;
     const dx = point.x - cue.start.x;
     const dy = point.y - cue.start.y;
     cue.end.x = cue.start.x - 1.5 * dx;
     cue.end.y = cue.start.y - 1.5 * dy;
   }
 
-  handlePointerUp(point: Point) {
-    if (!this.context.cue) return;
+  handlePointerUp(point: { x: number; y: number }) {
     const cue = this.context.cue;
+    if (!cue) return;
     const dx = point.x - cue.start.x;
     const dy = point.y - cue.start.y;
     cue.end.x = cue.start.x - 1.5 * dx;

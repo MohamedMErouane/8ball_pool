@@ -1,29 +1,29 @@
 # 8-Ball Pool - Polymatic Example
 
-This is a demo implementation of 8-Ball pool game using [Polymatic](https://github.com/piqnt/polymatic) framework, SVG, and [Planck/Box2D](https://github.com/piqnt/planck) physics engine.
+Multiplayer 8-Ball pool, implemented using [Polymatic](https://github.com/piqnt/polymatic) framework, [Socket.io](https://socket.io/), [Planck/Box2D](https://github.com/piqnt/planck) physics engine, and SVG rendering.
 
-[Play Live Demo](https://piqnt.github.io/polymatic-example-eight-ball/)
+[▶ Play Online](https://eight-ball.piqnt.com/)
 
-### How to run the code
+### Development
 
-To run or build the source code in this repository you need to have node.js/npm installed.
+Make sure you have node.js/npm installed.
 
-Install this project dependencies:
+Install dependencies:
 
 ```sh
 npm install
 ```
 
-To run the project locally:
+Run locally for development:
 
 ```sh
 npm run dev
 ```
 
-This will print out the url where you can open the project.
 
-To build the project for production:
+In production first build frontend, then start the server:
 
 ```sh
 npm run build
+npm start
 ```

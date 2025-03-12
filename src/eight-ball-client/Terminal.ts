@@ -1,7 +1,6 @@
 import { Dataset, Driver, Memo, Middleware } from "polymatic";
 
-import { MainContext } from "./Main";
-import { CueStick, Ball, Pocket, Rail, Table } from "./Data";
+import { CueStick, Ball, Pocket, Rail, Table, type BilliardContext } from "../eight-ball/Data";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -10,7 +9,7 @@ const STROKE_WIDTH = 0.006 / 2;
 /**
  * Implements rendering and collecting user-input
  */
-export class Terminal extends Middleware<MainContext> {
+export class Terminal extends Middleware<BilliardContext> {
   container: SVGGElement;
 
   scorecardGroup: SVGGElement;
@@ -75,9 +74,8 @@ export class Terminal extends Middleware<MainContext> {
 
   tableConfigMemo = Memo.init();
   handleWindowResize = () => {
-    if (!this.container || !this.context.table) return;
-
-    const table = this.context.table;
+    const table = this.context?.table;
+    if (!this.container || !table) return;
     if (this.tableConfigMemo.update(table.width, table.height, window.innerWidth, window.innerHeight)) {
       const width = table.width * 1.3;
       const height = table.height * 1.3;
@@ -127,6 +125,8 @@ export class Terminal extends Middleware<MainContext> {
   };
 
   handleFrameLoop = () => {
+    if (!this.context.balls || !this.context.rails || !this.context.pockets) return;
+
     this.dataset.data([
       this.context.table,
       ...this.context.rails,
