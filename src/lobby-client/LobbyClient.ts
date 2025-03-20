@@ -3,12 +3,10 @@ import { io, type Socket } from "socket.io-client";
 
 import { MainClient } from "../eight-ball-client/MainClient";
 import { MainOffline } from "../eight-ball-client/MainOffline";
-import { nanoid } from "nanoid";
 import { isValidRoomId, normalizeRoomId } from "../lobby/RoomId";
 
-class LobbyClientContext {
-  player?: string;
-  token?: string;
+export interface LobbyClientContext {
+  // nothing
 }
 
 export class LobbyClient extends Middleware<LobbyClientContext> {
@@ -38,17 +36,6 @@ export class LobbyClient extends Middleware<LobbyClientContext> {
     this.createRoomButton.addEventListener("click", this.handleCreateRoom);
     this.joinRoomButton.addEventListener("click", this.handleJoinRoom);
     this.leaveRoomButton.addEventListener("click", this.handleLeaveRoom);
-
-    // set up player and token
-    // player is public will be shared by other users, token is private
-    this.context.player = localStorage.getItem("eight-ball-player");
-    this.context.token = localStorage.getItem("eight-ball-token");
-    if (!this.context.player || !this.context.token) {
-      this.context.player = nanoid();
-      this.context.token = nanoid();
-      localStorage.setItem("eight-ball-player", this.context.player);
-      localStorage.setItem("eight-ball-token", this.context.token);
-    }
 
     // set up io connection and listeners
     this.io = io();

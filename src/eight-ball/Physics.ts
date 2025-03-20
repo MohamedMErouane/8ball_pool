@@ -2,7 +2,7 @@ import { World, Circle, Polygon, type Vec2Value, Contact, Body, Settings } from 
 
 import { Dataset, Driver, Middleware } from "polymatic";
 
-import { Ball, Pocket, Rail, type BilliardContext } from "./Data";
+import { Ball, Pocket, Rail, type BilliardContext } from "./BilliardContext";
 
 export type Entity = Ball | Rail | Pocket;
 
@@ -14,6 +14,8 @@ export class Physics extends Middleware<BilliardContext> {
 
   time: number = 0;
   timeStep = 1000 / 20;
+
+  pocketedBalls: Ball[] = [];
 
   constructor() {
     super();
@@ -27,11 +29,13 @@ export class Physics extends Middleware<BilliardContext> {
   }
 
   handleCueShot(data: { ball: Ball; shot: Vec2Value }) {
+    if (this.context.shotInProgress || this.context.gameOver) return;
     const body = this.ballDriver.ref(data.ball.key);
     if (!body) return;
     this.context.sleep = false;
     body.applyLinearImpulse(data.shot, body.getPosition());
-    // this.pause = 5000;
+    this.context.shotInProgress = true;
+    this.emit("shot-start", { ball: data.ball });
   }
 
   setup() {
@@ -46,15 +50,23 @@ export class Physics extends Middleware<BilliardContext> {
     this.time += ev.dt;
     while (this.time >= this.timeStep) {
       this.time -= this.timeStep;
-
       if (this.context.sleep) continue;
       this.world.step(this.timeStep / 1000);
+    }
 
-      this.context.sleep = true;
+    if (!this.context.sleep) {
+      let sleep = true;
       for (let b = this.world.getBodyList(); b; b = b.getNext()) {
         if (b.isAwake() && !b.isStatic()) {
-          this.context.sleep = false;
+          sleep = false;
         }
+      }
+      this.context.sleep = sleep;
+      if (sleep && this.context.shotInProgress) {
+        this.context.shotInProgress = false;
+        const pocketed = [...this.pocketedBalls];
+        this.pocketedBalls.length = 0;
+        this.emit("shot-end", { pocketed });
       }
     }
   }
@@ -73,9 +85,18 @@ export class Physics extends Middleware<BilliardContext> {
     const ball = dataA.type === "ball" ? dataA : dataB.type === "ball" ? dataB : null;
     const pocket = dataA.type === "pocket" ? dataA : dataB.type === "pocket" ? dataB : null;
 
+    if (pocket) {
+      // do not apply any force to the ball
+      contact.setEnabled(false);
+    }
+
     if (ball && pocket) {
       // do not change world immediately
-      this.world.queueUpdate(() => this.emit("ball-in-pocket", { ball, pocket }));
+      this.pocketedBalls.push(ball);
+      const index = this.context.balls.indexOf(ball);
+      if (index >= 0) {
+        this.context.balls.splice(index, 1);
+      }
     }
   };
 
@@ -105,8 +126,9 @@ export class Physics extends Middleware<BilliardContext> {
     },
     update: (data, body) => {
       const p = body.getPosition();
-      data.position.x = p.x;
-      data.position.y = p.y;
+      // we only need three decimal position (millimeter) outside physics simulation
+      data.position.x = ((p.x * 1000) | 0) / 1000;
+      data.position.y = ((p.y * 1000) | 0) / 1000;
     },
     exit: (data, body) => {
       this.world.destroyBody(body);
@@ -145,7 +167,6 @@ export class Physics extends Middleware<BilliardContext> {
       const fixture = body.createFixture({
         shape: new Circle(data.radius),
         userData: data,
-        isSensor: true,
       });
       return body;
     },

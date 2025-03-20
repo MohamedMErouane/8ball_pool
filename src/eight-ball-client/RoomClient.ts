@@ -2,7 +2,16 @@ import { Middleware } from "polymatic";
 import { io, type Socket } from "socket.io-client";
 
 import { type ClientBilliardContext } from "./MainClient";
+import { nanoid } from "nanoid";
 
+export interface Auth {
+  id: string;
+  secret: string;
+}
+
+/**
+ * This runs on client and is responsible for receiving data from server, and passing user actions to server.
+ */
 export class RoomClient extends Middleware<ClientBilliardContext> {
   io: Socket;
   statusElement: HTMLElement;
@@ -20,13 +29,23 @@ export class RoomClient extends Middleware<ClientBilliardContext> {
     this.statusElement = document.getElementById("room-status");
     this.printRoomStatus();
 
-    const room = this.context.room;
+    // set up auth id and secret
+    // id is public and will be shared by other users, secret is private
+    const auth = {} as Auth;
+    auth.id = localStorage.getItem("auth-id");
+    auth.secret = localStorage.getItem("auth-secret");
+    if (!auth.id || !auth.secret) {
+      auth.id = "player-" + nanoid(8);
+      auth.secret = "secret-" + nanoid(8);
+      localStorage.setItem("auth-id", auth.id);
+      localStorage.setItem("auth-secret", auth.secret);
+    }
 
+    this.context.auth = auth;
+
+    const room = this.context.room;
     this.io = io("/room/" + room, {
-      auth: {
-        player: this.context.player,
-        token: this.context.token,
-      },
+      auth: auth,
     });
 
     this.io.on("connect_error", (err) => {
@@ -34,14 +53,14 @@ export class RoomClient extends Middleware<ClientBilliardContext> {
       if (err.message === "Invalid namespace") {
         this.connectionError = "Room not found!";
       } else {
-        this.connectionError = "Connection error";
+        this.connectionError = "Connection error: " + err.message;
       }
       this.printRoomStatus();
     });
 
     this.io.on("connect_failed", (err) => {
       console.log("connect_failed", err);
-      this.connectionError = "Connection failed";
+      this.connectionError = "Connection failed: " + err.message;
     });
 
     this.io.on("connect", () => {
@@ -50,19 +69,18 @@ export class RoomClient extends Middleware<ClientBilliardContext> {
       this.printRoomStatus();
     });
     this.io.on("room-update", this.handleServerRoomState);
-    this.io.on("player-update", this.handleServerPlayerState);
   };
 
   handleDeactivate = () => {
+    this.statusElement.innerText = "";
     this.io?.disconnect();
   };
 
-  handleServerRoomState = (data: object) => {
+  handleServerRoomState = (data: any) => {
     Object.assign(this.context, data);
-  };
-
-  handleServerPlayerState = (data: object) => {
-    Object.assign(this.context, data);
+    if (Array.isArray(data.players) && this.context.auth) {
+      this.context.player = data.players.find((p) => p.id === this.context.auth.id);
+    }
   };
 
   handleCueShot = (data: object) => {

@@ -1,6 +1,6 @@
 import { Middleware } from "polymatic";
 
-import { Color, Ball, type BilliardContext, Table, Rail, Pocket } from "./Data";
+import { Color, Ball, type BilliardContext, Table, Rail, Pocket } from "./BilliardContext";
 
 /**
  * Pool table geometrical configuration (rails, pockets, etc.)
@@ -9,7 +9,6 @@ export class PoolTable extends Middleware<BilliardContext> {
   constructor() {
     super();
     this.on("init-table", this.initTable);
-    this.on("init-balls", this.initBalls);
     this.on("init-cue-ball", this.initCueBall);
   }
 
@@ -78,53 +77,25 @@ export class PoolTable extends Middleware<BilliardContext> {
     this.context.table = table;
     this.context.rails = rails;
     this.context.pockets = pockets;
-  }
 
-  initBalls() {
-    const r = this.ballRadius;
-    const cx = this.width / 4;
-    const cy = 0;
-
-    const SPI3 = Math.sin(Math.PI / 3);
-
-    const colors = [...Color.all].sort((a, b) => 0.5 - Math.random());
-    colors.splice(4, 0, Color.black);
-
-    const balls = [];
-
-    const n = 5;
-    const d = r * 2;
-    const l = SPI3 * d;
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j <= i; j++) {
-        balls.push(
-          new Ball(
-            {
-              x: cx + i * l /*- (n - 1) * 0.5 * l*/ + Math.random() * r * 0.02,
-              y: cy + (j - i * 0.5) * d + Math.random() * r * 0.02,
-            },
-            this.ballRadius,
-            colors.shift()
-          )
-        );
-      }
-    }
-
-    this.context.balls = balls;
-
-    this.initCueBall();
+    this.emit("update");
   }
 
   initCueBall() {
+    const r = this.context.table.ballRadius;
+    const tw = this.context.table.width;
+
     this.context.balls.push(
       new Ball(
         {
-          x: -this.width / 4,
+          x: -tw / 4,
           y: 0,
         },
-        this.ballRadius,
-        Color.white
-      )
+        r,
+        Color.white,
+      ),
     );
+
+    this.emit("update");
   }
 }

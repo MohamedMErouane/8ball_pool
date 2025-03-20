@@ -1,9 +1,12 @@
 import { Middleware } from "polymatic";
 
-import { CueStick, type BilliardContext } from "./Data";
+import { CueStick, type BilliardContext } from "./BilliardContext";
 
 /**
- * Implements cue stick shot. It listens to user pointer input events from Terminal, and updates the cue object in the context, and sends cue-shot events.
+ * Implements cue and shot:
+ * - Listens to user pointer input events (from Terminal)
+ * - Updates the cue stick object in the context
+ * - Emits cue-shot events
  */
 export class CueShot extends Middleware<BilliardContext> {
   constructor() {
@@ -22,8 +25,8 @@ export class CueShot extends Middleware<BilliardContext> {
   }
 
   handlePointerStart(point: { x: number; y: number }) {
-    console.log("cue-shot", this.context.turn, this.context.player);
-    if (this.context.turn && this.context.turn !== this.context.player) return;
+    if (this.context.shotInProgress || this.context.gameOver) return;
+    // if (this.context.turn && this.context.turn.player === this.context) return;
     const ball = this.context.balls.find((ball) => ball.color === "white");
     if (!ball) return;
     const cue = new CueStick();

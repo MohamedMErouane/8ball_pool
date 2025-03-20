@@ -1,3 +1,6 @@
+import { nanoid } from "nanoid";
+import { type Turn } from "./TurnBased";
+
 export class Color {
   static all = [
     "yellow-solid",
@@ -26,7 +29,7 @@ export interface Point {
 
 export class Ball {
   type = "ball" as const;
-  key = "ball-" + Math.random();
+  key = "ball-" + nanoid(6);
   color: string;
   position: Point = { x: 0, y: 0 };
   radius: number;
@@ -41,7 +44,7 @@ export class Ball {
 
 export class Rail {
   type = "rail" as const;
-  key = "rail-" + Math.random();
+  key = "rail-" + nanoid(6);
   vertices: Point[] = [];
 
   constructor(vertices: { x: number; y: number }[]) {
@@ -51,7 +54,7 @@ export class Rail {
 
 export class Table {
   type = "table" as const;
-  key = "table-" + Math.random();
+  key = "table-" + nanoid(6);
   width: number;
   height: number;
   ballRadius: number;
@@ -67,7 +70,7 @@ export class Table {
 
 export class Pocket {
   type = "pocket" as const;
-  key = "pocket-" + Math.random();
+  key = "pocket-" + nanoid(6);
   position: Point = { x: 0, y: 0 };
   radius: number;
 
@@ -80,15 +83,22 @@ export class Pocket {
 
 export class CueStick {
   type = "cue" as const;
-  key = "cue-" + Math.random();
+  key = "cue-" + nanoid(6);
   ball: Ball;
   start: Point = { x: 0, y: 0 };
   end: Point = { x: 0, y: 0 };
 }
 
-export class BilliardContext {
-  turn?: string;
+export interface Player {
+  id: string;
+  name?: string;
 
+  color?: "striped" | "solid";
+
+  turn?: string;
+}
+
+export class BilliardContext {
   cue?: CueStick;
   balls?: Ball[] = [];
   rails?: Rail[] = [];
@@ -96,4 +106,15 @@ export class BilliardContext {
   table?: Table;
 
   sleep? = false;
+  shotInProgress? = false;
+
+  gameOver? = false;
+
+  turn?: Turn;
+
+  // used in multiplayer client
+  player?: Player;
+
+  // used in multiplayer client and server
+  players?: Player[] = [];
 }

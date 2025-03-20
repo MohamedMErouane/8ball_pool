@@ -2,41 +2,79 @@ import { Middleware } from "polymatic";
 
 import type { ServerBilliardContext } from "./MainServer";
 
+export interface Auth {
+  id: string;
+  secret: string;
+}
+
+/**
+ * This runs on server and is responsible for sending data to clients, and receiving user actions from clients.
+ */
 export class RoomServer extends Middleware<ServerBilliardContext> {
-  roomTimeout: any;
+  inactiveRoomTimeout: any;
 
   constructor() {
     super();
     this.on("activate", this.handleActivate);
     this.on("deactivate", this.handleDeactivate);
-    this.on("next-turn", this.handleNextTurn);
     this.on("frame-loop", this.handleFrameLoop);
+
+    this.on("update", this.sendFixedObjects);
+
+    this.on("user-enter", this.handleUserEnter);
+    this.on("user-exit", this.handleUserExit);
   }
 
   handleActivate() {
     this.extendRoomLease();
 
-    this.context.turn = this.context.room?.players[0];
     this.context.io.on("connection", (socket) => {
-      const auth = socket.handshake.auth;
+      const auth = { ...socket.handshake.auth } as Auth;
 
       const room = this.context.room;
-      if (!room) return;
-      if (room.tokens.get(auth.player) !== auth.token) return;
+
+      if (!room || !auth) return;
+
+      let record = this.context.auths.find((p) => p.id === auth.id);
+
+      if (!record) {
+        record = { id: auth.id, secret: auth.secret };
+        this.context.auths.push(record);
+      } else if (record.secret !== auth.secret) {
+        return;
+      }
+
+      let player = this.context.players.find((p) => p.id === auth.id);
+      if (!player) {
+        player = { id: auth.id };
+        this.context.players.push(player);
+      }
+
+      this.emit("user-enter", { player });
 
       socket.on("cue-shot", (data) => {
-        if (!auth || this.context.turn !== auth.player) return;
+        if (!this.context.sleep) return;
+        if (this.context.turn.current !== player.turn) return;
         this.emit("cue-shot", data);
 
         this.extendRoomLease();
       });
 
-      // socket.emit("player-update", { token: socket.id });
+      this.sendFixedObjects();
+
+      socket.on("exit-room", (data) => {
+        this.context.players = this.context.players.filter((p) => p.id !== player.id);
+        this.emit("user-exit", { player });
+      });
+
+      socket.on("disconnect", () => {
+        this.emit("user-exit", { player });
+      });
     });
   }
 
   handleDeactivate = () => {
-    clearTimeout(this.roomTimeout);
+    clearTimeout(this.inactiveRoomTimeout);
 
     const io = this.context.io;
     if (io) {
@@ -48,36 +86,47 @@ export class RoomServer extends Middleware<ServerBilliardContext> {
   };
 
   extendRoomLease = () => {
-    clearTimeout(this.roomTimeout);
-    this.roomTimeout = setTimeout(this.expireRoomLease, 30 * 60 * 1000);
+    clearTimeout(this.inactiveRoomTimeout);
+    this.inactiveRoomTimeout = setTimeout(this.expireRoomLease, 30 * 60 * 1000);
   };
 
   expireRoomLease = () => {
     this.emit("terminate-room");
   };
 
-  handleNextTurn() {
-    if (!this.context.room) return;
-    const players = this.context.room.players;
-    if (!this.context.turn) {
-      this.context.turn = players[0];
-    } else {
-      const index = players.indexOf(this.context.turn);
-      const next = (index + 1) % players.length;
-      this.context.turn = players[next];
+  handleFrameLoop() {
+    if (!this.context.sleep) {
+      this.sendMovingObjects();
     }
   }
 
-  handleFrameLoop() {
-    const { balls, rails, pockets, table, turn } = this.context;
-    // if (this.context.sleep) return;
+  sendMovingObjects = () => {
+    const { balls, turn, shotInProgress, gameOver } = this.context;
     this.context.io.emit("room-update", {
-      turn: turn,
-      players: this.context.room?.players,
-      balls: balls,
-      rails: rails,
-      pockets: pockets,
-      table: table,
+      turn,
+      balls,
+      shotInProgress,
+      gameOver
     });
-  }
+  };
+
+  sendFixedObjects = () => {
+    const { rails, pockets, table, players } = this.context;
+    this.context.io.emit("room-update", {
+      players,
+      rails,
+      pockets,
+      table,
+    });
+    this.sendMovingObjects();
+  };
+
+  handleUserEnter = () => {
+    const isReady = this.context.players.length === this.context.turn.turns.length;
+    if (isReady) {
+      this.emit("init-game");
+    }
+  };
+
+  handleUserExit = () => {};
 }

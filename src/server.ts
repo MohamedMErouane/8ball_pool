@@ -17,7 +17,7 @@ const httpServer = http.createServer(expressApp);
 // serves socket.io admin-ui
 expressApp.use(
   "/admin/socket.io",
-  express.static(path.join(import.meta.dirname, "../../node_modules/@socket.io/admin-ui/ui/dist"))
+  express.static(path.join(import.meta.dirname, "../../node_modules/@socket.io/admin-ui/ui/dist")),
 );
 
 // serve client app

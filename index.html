@@ -12,12 +12,18 @@
 
 <body>
   <svg id="polymatic-eight-ball" class="terminal"></svg>
-  <div class="lobby-panel">
+  <div style="position: absolute; top: 0.5em; right: 0.5em;">
+    <span id="game-status"></span>
+    <span id="player-status"></span>
+  </div>
+  <div style="position: absolute; top: 0.5em; left: 0.5em;">
+    <span id="room-status"></span>
+  </div>
+  <div style="position: absolute; bottom: 0.5em; left: 0.5em;">
     <button id="play-offline">Play Offline</button>
     <button id="create-room">Create Room</button>
     <button id="join-room">Join Room</button>  
     <button id="leave-room">Leave Room</button>
-    <span id="room-status"></span>
   </div>
   <script type="module" src="./src/client"></script>
 </body>

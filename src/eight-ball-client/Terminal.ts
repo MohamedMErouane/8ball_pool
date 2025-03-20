@@ -1,6 +1,6 @@
 import { Dataset, Driver, Memo, Middleware } from "polymatic";
 
-import { CueStick, Ball, Pocket, Rail, Table, type BilliardContext } from "../eight-ball/Data";
+import { CueStick, Ball, Pocket, Rail, Table, type BilliardContext } from "../eight-ball/BilliardContext";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 

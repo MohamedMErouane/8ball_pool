@@ -1,20 +1,24 @@
 import { Middleware, Runtime } from "polymatic";
 import { Namespace } from "socket.io";
 
-import { BilliardContext } from "../eight-ball/Data";
+import { BilliardContext, type Player } from "../eight-ball/BilliardContext";
 
 import { PoolTable } from "../eight-ball/PoolTable";
-import { EightBall } from "../eight-ball/EightBall";
+import { EightBall2P } from "../eight-ball/EightBall2P";
 import { NodeFrameLoop } from "./FixedLoop";
 import { CueShot } from "../eight-ball/CueShot";
 import { Physics } from "../eight-ball/Physics";
+import { TurnBased } from "../eight-ball/TurnBased";
 
-import { RoomServer } from "./RoomServer";
+import { RoomServer, type Auth } from "./RoomServer";
 import { type Room } from "../lobby-server/LobbyServer";
+import { Rack } from "../eight-ball/Rack";
 
 export class ServerBilliardContext extends BilliardContext {
   io: Namespace;
   room?: Room;
+
+  auths: Auth[] = [];
 }
 
 /**
@@ -26,11 +30,13 @@ export class MainServer extends Middleware<ServerBilliardContext> {
 
     this.use(new NodeFrameLoop());
     this.use(new PoolTable());
-    this.use(new EightBall());
+    this.use(new Rack());
+    this.use(new EightBall2P());
     this.use(new Physics());
     this.use(new CueShot());
 
     this.use(new RoomServer());
+    this.use(new TurnBased());
 
     this.on("terminate-room", () => Runtime.deactivate(this));
   }

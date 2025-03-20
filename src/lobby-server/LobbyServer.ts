@@ -9,8 +9,6 @@ export const lobby = (io: Server) => {
 
 export class Room {
   id = randomRoomId();
-  tokens = new Map<string, string>();
-  players: string[] = [];
 }
 
 interface LobbyContext {
@@ -41,25 +39,11 @@ class LobbyServer extends Middleware<LobbyContext> {
   handleCreateRoomRequest = ({ socket }: { socket: Socket }) => {
     const room = new Room();
 
-    // for (let i = 0; i < sockets.length; i++) {
-    //   const player = "player-" + nanoid();
-    //   const token = "token-" + nanoid();
-    //   room.players.push(player);
-    //   room.tokens.set(player, token);
-    // }
-
     this.activateRoom(room);
 
     socket.emit("room-ready", {
       id: room.id,
     });
-
-    // for (let i = 0; i < sockets.length; i++) {
-    //   const socket = sockets[i];
-    //   const player = room.players[i];
-    //   const token = room.tokens.get(player);
-    //   socket.emit("join-room", { room: room.id, token: token, player: player });
-    // }
   };
 
   activateRoom = (room: Room) => {
