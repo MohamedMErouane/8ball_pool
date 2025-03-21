@@ -13,7 +13,7 @@ export class LobbyClient extends Middleware<LobbyClientContext> {
   playOfflineButton: HTMLElement;
   createRoomButton: HTMLElement;
   joinRoomButton: HTMLElement;
-  leaveRoomButton: HTMLElement;
+  // leaveRoomButton: HTMLElement;
 
   io: Socket;
 
@@ -30,12 +30,12 @@ export class LobbyClient extends Middleware<LobbyClientContext> {
     this.playOfflineButton = document.getElementById("play-offline");
     this.createRoomButton = document.getElementById("create-room");
     this.joinRoomButton = document.getElementById("join-room");
-    this.leaveRoomButton = document.getElementById("leave-room");
+    // this.leaveRoomButton = document.getElementById("leave-room");
 
     this.playOfflineButton.addEventListener("click", this.handlePlayOffline);
     this.createRoomButton.addEventListener("click", this.handleCreateRoom);
     this.joinRoomButton.addEventListener("click", this.handleJoinRoom);
-    this.leaveRoomButton.addEventListener("click", this.handleLeaveRoom);
+    // this.leaveRoomButton.addEventListener("click", this.handleLeaveRoom);
 
     // set up io connection and listeners
     this.io = io();
@@ -84,7 +84,7 @@ export class LobbyClient extends Middleware<LobbyClientContext> {
     });
   };
 
-  handleLeaveRoom = () => {
-    // localStorage.removeItem("eight-ball-room");
-  };
+  // handleLeaveRoom = () => {
+  // localStorage.removeItem("eight-ball-room");
+  // };
 }
