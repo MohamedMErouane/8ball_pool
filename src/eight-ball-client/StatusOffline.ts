@@ -1,10 +1,9 @@
 import { Memo, Middleware } from "polymatic";
 
-import { type ClientBilliardContext } from "../eight-ball-client/MainClient";
+import { type ClientBilliardContext } from "./MainClient";
 
 export class StatusOffline extends Middleware<ClientBilliardContext> {
-  gameStatusElement: HTMLElement;
-  roomStatusElement: HTMLElement;
+  statusElement: HTMLElement;
   memo = Memo.init();
 
   constructor() {
@@ -15,27 +14,25 @@ export class StatusOffline extends Middleware<ClientBilliardContext> {
   }
 
   handleActivate() {
-    this.gameStatusElement = document.getElementById("game-status");
-    this.roomStatusElement = document.getElementById("room-status");
-    this.roomStatusElement.innerText = "Offline Mode";
+    this.statusElement = document.getElementById("game-status");
   }
 
   handleDeactivate() {
     this.memo.clear();
-    this.gameStatusElement.innerText = null;
-    this.roomStatusElement.innerText = null;
+    this.statusElement.innerText = null;
   }
 
   handleFrameLoop = () => {
     const context = this.context;
     if (this.memo.update(context.shotInProgress, context.gameOver)) {
       const status = [];
+      status.push("Offline Mode");
       if (context.shotInProgress) {
         status.push("Shot in progress");
       } else if (context.gameOver) {
         status.push("Game over");
       }
-      this.gameStatusElement.innerText = status.join(" | ");
+      this.statusElement.innerText = status.join(" | ");
     }
   };
 }

@@ -10,7 +10,7 @@ body {
   font-size: 0.95em;
 }
 
-#room-status {
+#room-status, #game-status {
   user-select: text;
 }
 

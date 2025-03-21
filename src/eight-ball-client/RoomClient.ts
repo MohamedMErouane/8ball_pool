@@ -88,10 +88,6 @@ export class RoomClient extends Middleware<ClientBilliardContext> {
   };
 
   printRoomStatus = () => {
-    const id = this.context.room ?? "";
-    this.statusElement.innerText = id;
-    if (this.connectionError) {
-      this.statusElement.innerText += " " + this.connectionError;
-    }
+    this.statusElement.innerText = this.connectionError;
   };
 }

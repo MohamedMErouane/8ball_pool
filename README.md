@@ -7,7 +7,7 @@ Multiplayer 8-Ball pool, implemented using [Polymatic](https://github.com/piqnt/
 ### Gameplay
 
 The gameplay is simplified eight-ball pool:
-- Solid and stipe are assigned to players randomly.
+- Solid (black edge) and stipe (white edge) are assigned to players randomly.
 - Two players take turns to play.
 - If a player pockets the cue ball, the turn is passed and the cue ball is placed at the original position.
 - If a player pockets the 8-ball before all their balls, they lose.

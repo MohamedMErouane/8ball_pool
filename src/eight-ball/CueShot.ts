@@ -26,7 +26,7 @@ export class CueShot extends Middleware<BilliardContext> {
 
   handlePointerStart(point: { x: number; y: number }) {
     if (this.context.shotInProgress || this.context.gameOver) return;
-    // if (this.context.turn && this.context.turn.player === this.context) return;
+    if (this.context.turn?.current !== this.context.player?.turn) return;
     const ball = this.context.balls.find((ball) => ball.color === "white");
     if (!ball) return;
     const cue = new CueStick();

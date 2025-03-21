@@ -21,7 +21,7 @@ export class TurnBased extends Middleware<TurnBasedContext> {
     this.on("activate", this.handleActivate);
     this.on("deactivate", this.handleDeactivate);
     this.on("pass-turn", this.handlePassTurn);
-    this.on("init-game", this.handleInitGame);
+    this.on("game-start", this.handleInitGame);
   }
 
   handleActivate = () => {
@@ -38,13 +38,11 @@ export class TurnBased extends Middleware<TurnBasedContext> {
   }
 
   handleInitGame = () => {
-    this.context.turn.current = this.context.turn.turns[0];
-    // todo: randomize turns
-    // todo: re-assign turns
-    for (let i = 0; i < this.context.turn.turns.length; i++) {
-      const turn = this.context.turn.turns[i];
-      const player = this.context.players[i];
-      player.turn = turn;
+    const turns = this.context.turn.turns;
+    this.context.turn.current = turns[0];
+    const players = this.context.players.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < turns.length; i++) {
+      players[i].turn = turns[i];
     }
   };
 }

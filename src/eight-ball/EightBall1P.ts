@@ -9,18 +9,17 @@ export class EightBall1P extends Middleware<BilliardContext> {
   constructor() {
     super();
     this.on("activate", this.handleActivate);
-    this.on("init-game", this.handleInitGame);
+    this.on("game-start", this.handleInitGame);
     this.on("shot-end", this.handleShotEnd);
   }
 
   handleActivate() {
     this.emit("init-table");
     this.emit("rack-balls");
-    this.emit("init-cue-ball");
   }
 
   handleInitGame() {
-    // todo
+    this.emit("init-cue-ball");
   }
 
   handleShotEnd = (data: { pocketed: Ball[] }) => {
@@ -29,6 +28,7 @@ export class EightBall1P extends Middleware<BilliardContext> {
 
     if (isEightBall) {
       this.context.gameOver = true;
+      this.emit("game-over");
     } else if (isCueBall) {
       setTimeout(() => this.emit("init-cue-ball"), 400);
     }

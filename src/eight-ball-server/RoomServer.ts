@@ -53,7 +53,6 @@ export class RoomServer extends Middleware<ServerBilliardContext> {
       this.emit("user-enter", { player });
 
       socket.on("cue-shot", (data) => {
-        if (!this.context.sleep) return;
         if (this.context.turn.current !== player.turn) return;
         this.emit("cue-shot", data);
 
@@ -101,12 +100,13 @@ export class RoomServer extends Middleware<ServerBilliardContext> {
   }
 
   sendMovingObjects = () => {
-    const { balls, turn, shotInProgress, gameOver } = this.context;
+    const { balls, turn, shotInProgress, gameOver, winner } = this.context;
     this.context.io.emit("room-update", {
       turn,
       balls,
       shotInProgress,
-      gameOver
+      gameOver,
+      winner,
     });
   };
 
@@ -122,9 +122,11 @@ export class RoomServer extends Middleware<ServerBilliardContext> {
   };
 
   handleUserEnter = () => {
-    const isReady = this.context.players.length === this.context.turn.turns.length;
-    if (isReady) {
-      this.emit("init-game");
+    const playersJoined = this.context.players.length === this.context.turn.turns.length;
+    const notStarted = !this.context.gameStarted;
+    if (playersJoined && notStarted) {
+      this.context.gameStarted = true;
+      this.emit("game-start");
     }
   };
 

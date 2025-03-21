@@ -7,7 +7,7 @@ import { FrameLoop } from "./FrameLoop";
 import { CueShot } from "../eight-ball/CueShot";
 import { Physics } from "../eight-ball/Physics";
 import { type BilliardContext } from "../eight-ball/BilliardContext";
-import { StatusOffline } from "../eight-ball/Status1P";
+import { StatusOffline } from "./StatusOffline";
 import { Rack } from "../eight-ball/Rack";
 
 /**
@@ -24,5 +24,11 @@ export class MainOffline extends Middleware<BilliardContext> {
     this.use(new CueShot());
     this.use(new Terminal());
     this.use(new StatusOffline());
+    this.on("activate", this.handleActivate);
   }
+
+  handleActivate = () => {
+    this.context.gameStarted = true;
+    this.emit("game-start");
+  };
 }

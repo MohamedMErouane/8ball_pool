@@ -5,7 +5,7 @@ import { FrameLoop } from "./FrameLoop";
 import { CueShot } from "../eight-ball/CueShot";
 import { RoomClient, type Auth } from "./RoomClient";
 import { BilliardContext } from "../eight-ball/BilliardContext";
-import { GameStatus } from "../eight-ball/Status2P";
+import { StatusOnline } from "./StatusOnline";
 
 export class ClientBilliardContext extends BilliardContext {
   room?: string;
@@ -22,6 +22,6 @@ export class MainClient extends Middleware<ClientBilliardContext> {
     this.use(new CueShot());
     this.use(new Terminal());
     this.use(new RoomClient());
-    this.use(new GameStatus());
+    this.use(new StatusOnline());
   }
 }

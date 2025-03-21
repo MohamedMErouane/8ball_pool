@@ -10,7 +10,7 @@ export class EightBall2P extends Middleware<ServerBilliardContext> {
   constructor() {
     super();
     this.on("activate", this.handleActivate);
-    this.on("init-game", this.handleInitGame);
+    this.on("game-start", this.handleInitGame);
     this.on("shot-end", this.handleShotEnd);
   }
 
@@ -34,7 +34,12 @@ export class EightBall2P extends Middleware<ServerBilliardContext> {
     const hasOwnBall = data.pocketed.some((ball) => ball.color.endsWith(color));
 
     if (hasEightBall) {
+      const ownBallLeft = this.context.balls.some((ball) => ball.color?.indexOf(color) > -1);
+      const playerWin = !ownBallLeft;
+      const winner = playerWin ? player : this.context.players.find((p) => p.id !== player.id);
       this.context.gameOver = true;
+      this.context.winner = winner?.id;
+      this.emit("game-over");
     } else if (hasCueBall) {
       this.emit("pass-turn");
       setTimeout(() => this.emit("init-cue-ball"), 400);

@@ -108,7 +108,9 @@ export class BilliardContext {
   sleep? = false;
   shotInProgress? = false;
 
+  gameStarted? = false;
   gameOver? = false;
+  winner?: string;
 
   turn?: Turn;
 
