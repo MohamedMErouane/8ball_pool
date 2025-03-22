@@ -1,5 +1,4 @@
 import { World, Circle, Polygon, type Vec2Value, Contact, Body, Settings } from "planck";
-
 import { Dataset, Driver, Middleware } from "polymatic";
 
 import { Ball, Pocket, Rail, type BilliardContext } from "./BilliardContext";
@@ -17,6 +16,8 @@ export class Physics extends Middleware<BilliardContext> {
 
   pocketedBalls: Ball[] = [];
 
+  asleep = true;
+
   constructor() {
     super();
     this.on("activate", this.setup);
@@ -32,7 +33,7 @@ export class Physics extends Middleware<BilliardContext> {
     if (this.context.shotInProgress || this.context.gameOver) return;
     const body = this.ballDriver.ref(data.ball.key);
     if (!body) return;
-    this.context.sleep = false;
+    this.asleep = false;
     body.applyLinearImpulse(data.shot, body.getPosition());
     this.context.shotInProgress = true;
     this.emit("shot-start", { ball: data.ball });
@@ -50,25 +51,30 @@ export class Physics extends Middleware<BilliardContext> {
     this.time += ev.dt;
     while (this.time >= this.timeStep) {
       this.time -= this.timeStep;
-      if (this.context.sleep) continue;
+      if (this.asleep) continue;
       this.world.step(this.timeStep / 1000);
     }
 
-    if (!this.context.sleep) {
-      let sleep = true;
-      for (let b = this.world.getBodyList(); b; b = b.getNext()) {
-        if (b.isAwake() && !b.isStatic()) {
-          sleep = false;
+    if (!this.asleep) {
+      let asleep = true;
+      for (let b = this.world.getBodyList(); b && asleep; b = b.getNext()) {
+        if (!b.isStatic() && b.isAwake()) {
+          asleep = false;
         }
       }
-      this.context.sleep = sleep;
-      if (sleep && this.context.shotInProgress) {
-        this.context.shotInProgress = false;
-        const pocketed = [...this.pocketedBalls];
-        this.pocketedBalls.length = 0;
-        this.emit("shot-end", { pocketed });
+      this.asleep = asleep;
+      if (this.asleep && this.context.shotInProgress) {
+        this.endShot();
       }
     }
+  }
+
+  endShot() {
+    if (!this.context.shotInProgress) return;
+    this.context.shotInProgress = false;
+    const pocketed = [...this.pocketedBalls];
+    this.pocketedBalls.length = 0;
+    this.emit("shot-end", { pocketed });
   }
 
   collide = (contact: Contact) => {

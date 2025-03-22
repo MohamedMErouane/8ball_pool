@@ -1,13 +1,8 @@
 import { Middleware } from "polymatic";
 import { io, type Socket } from "socket.io-client";
-
-import { type ClientBilliardContext } from "./MainClient";
 import { nanoid } from "nanoid";
 
-export interface Auth {
-  id: string;
-  secret: string;
-}
+import { type Auth, type ClientBilliardContext } from "./ClientContext";
 
 /**
  * This runs on client and is responsible for receiving data from server, and passing user actions to server.

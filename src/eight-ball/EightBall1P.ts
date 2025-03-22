@@ -3,13 +3,13 @@ import { Middleware } from "polymatic";
 import { Color, Ball, type BilliardContext } from "./BilliardContext";
 
 /**
- * 8-ball rules and gameplay.
+ * 1-player eight-ball rules and gameplay.
  */
 export class EightBall1P extends Middleware<BilliardContext> {
   constructor() {
     super();
     this.on("activate", this.handleActivate);
-    this.on("game-start", this.handleInitGame);
+    this.on("game-start", this.handleGameStart);
     this.on("shot-end", this.handleShotEnd);
   }
 
@@ -18,7 +18,7 @@ export class EightBall1P extends Middleware<BilliardContext> {
     this.emit("rack-balls");
   }
 
-  handleInitGame() {
+  handleGameStart() {
     this.emit("init-cue-ball");
   }
 

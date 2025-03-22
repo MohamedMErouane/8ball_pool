@@ -1,6 +1,6 @@
 import { Memo, Middleware } from "polymatic";
 
-import { type ClientBilliardContext } from "./MainClient";
+import { type ClientBilliardContext } from "./ClientContext";
 
 export class StatusOffline extends Middleware<ClientBilliardContext> {
   statusElement: HTMLElement;

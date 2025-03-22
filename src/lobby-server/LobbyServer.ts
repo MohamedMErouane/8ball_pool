@@ -1,7 +1,9 @@
 import { type Server, type Socket } from "socket.io";
 import { Middleware, Runtime } from "polymatic";
-import { ServerBilliardContext, MainServer } from "../eight-ball-server/MainServer";
+
 import { randomRoomId } from "../lobby/RoomId";
+import { MainServer } from "../eight-ball-server/MainServer";
+import { ServerBilliardContext } from "../eight-ball-server/ServerContext";
 
 export const lobby = (io: Server) => {
   Runtime.activate(new LobbyServer(), { io });

@@ -1,11 +1,6 @@
 import { Middleware } from "polymatic";
 
-import type { ServerBilliardContext } from "./MainServer";
-
-export interface Auth {
-  id: string;
-  secret: string;
-}
+import { type ServerBilliardContext, type Auth } from "./ServerContext";
 
 /**
  * This runs on server and is responsible for sending data to clients, and receiving user actions from clients.
@@ -94,18 +89,19 @@ export class RoomServer extends Middleware<ServerBilliardContext> {
   };
 
   handleFrameLoop() {
-    if (!this.context.sleep) {
+    if (this.context.shotInProgress) {
       this.sendMovingObjects();
     }
   }
 
   sendMovingObjects = () => {
-    const { balls, turn, shotInProgress, gameOver, winner } = this.context;
+    const { balls, shotInProgress, gameOver, gameStarted, turn, winner } = this.context;
     this.context.io.emit("room-update", {
-      turn,
       balls,
+      gameStarted,
       shotInProgress,
       gameOver,
+      turn,
       winner,
     });
   };

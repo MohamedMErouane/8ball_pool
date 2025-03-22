@@ -1,6 +1,6 @@
 import { Middleware } from "polymatic";
 
-import { Color, Ball, type BilliardContext, Table, Rail, Pocket } from "./BilliardContext";
+import { Color, Ball, type BilliardContext } from "./BilliardContext";
 
 /**
  * Triangular rack

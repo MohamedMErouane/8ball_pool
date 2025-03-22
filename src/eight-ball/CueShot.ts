@@ -1,6 +1,7 @@
 import { Middleware } from "polymatic";
 
 import { CueStick, type BilliardContext } from "./BilliardContext";
+import { isMyTurn } from "../eight-ball-client/ClientContext";
 
 /**
  * Implements cue and shot:
@@ -25,8 +26,7 @@ export class CueShot extends Middleware<BilliardContext> {
   }
 
   handlePointerStart(point: { x: number; y: number }) {
-    if (this.context.shotInProgress || this.context.gameOver) return;
-    if (this.context.turn?.current !== this.context.player?.turn) return;
+    if (!isMyTurn(this.context)) return;
     const ball = this.context.balls.find((ball) => ball.color === "white");
     if (!ball) return;
     const cue = new CueStick();
@@ -60,6 +60,7 @@ export class CueShot extends Middleware<BilliardContext> {
     const ball = cue.ball;
     this.context.cue = null;
 
+    if (!isMyTurn(this.context)) return;
     this.emit("cue-shot", { ball, shot });
   }
 }

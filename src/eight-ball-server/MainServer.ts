@@ -1,25 +1,14 @@
 import { Middleware, Runtime } from "polymatic";
-import { Namespace } from "socket.io";
 
-import { BilliardContext, type Player } from "../eight-ball/BilliardContext";
-
+import { type ServerBilliardContext } from "./ServerContext";
 import { PoolTable } from "../eight-ball/PoolTable";
 import { EightBall2P } from "../eight-ball/EightBall2P";
 import { NodeFrameLoop } from "./FixedLoop";
 import { CueShot } from "../eight-ball/CueShot";
 import { Physics } from "../eight-ball/Physics";
 import { TurnBased } from "../eight-ball/TurnBased";
-
-import { RoomServer, type Auth } from "./RoomServer";
-import { type Room } from "../lobby-server/LobbyServer";
+import { RoomServer } from "./RoomServer";
 import { Rack } from "../eight-ball/Rack";
-
-export class ServerBilliardContext extends BilliardContext {
-  io: Namespace;
-  room?: Room;
-
-  auths: Auth[] = [];
-}
 
 /**
  * Main class for the billiard game server.

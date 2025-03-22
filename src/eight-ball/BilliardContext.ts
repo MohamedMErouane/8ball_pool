@@ -18,8 +18,14 @@ export class Color {
     "blue-solid",
     "blue-stripe",
   ];
-  static white = "white";
-  static black = "black";
+  static white = "white" as const;
+  static black = "black" as const;
+  static stripe = "stripe" as const;
+  static solid = "solid" as const;
+
+  static is(color: string, query: string) {
+    return color === query || color?.endsWith(query);
+  }
 }
 
 export interface Point {
@@ -92,9 +98,7 @@ export class CueStick {
 export interface Player {
   id: string;
   name?: string;
-
-  color?: "striped" | "solid";
-
+  color?: "stripe" | "solid";
   turn?: string;
 }
 
@@ -105,18 +109,12 @@ export class BilliardContext {
   pockets?: Pocket[] = [];
   table?: Table;
 
-  sleep? = false;
-  shotInProgress? = false;
-
   gameStarted? = false;
+  shotInProgress? = false;
   gameOver? = false;
-  winner?: string;
 
-  turn?: Turn;
-
-  // used in multiplayer client
-  player?: Player;
-
-  // used in multiplayer client and server
+  // multiplayer fields
   players?: Player[] = [];
+  turn?: Turn;
+  winner?: string;
 }

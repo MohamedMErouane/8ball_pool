@@ -3,14 +3,9 @@ import { Middleware } from "polymatic";
 import { Terminal } from "./Terminal";
 import { FrameLoop } from "./FrameLoop";
 import { CueShot } from "../eight-ball/CueShot";
-import { RoomClient, type Auth } from "./RoomClient";
-import { BilliardContext } from "../eight-ball/BilliardContext";
+import { RoomClient } from "./RoomClient";
 import { StatusOnline } from "./StatusOnline";
-
-export class ClientBilliardContext extends BilliardContext {
-  room?: string;
-  auth?: Auth;
-}
+import { type ClientBilliardContext } from "./ClientContext";
 
 /**
  * Main class for the billiard game client.

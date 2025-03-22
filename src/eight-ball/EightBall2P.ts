@@ -1,16 +1,15 @@
 import { Middleware } from "polymatic";
 
-import { Color, Ball } from "./BilliardContext";
-import { type ServerBilliardContext } from "../eight-ball-server/MainServer";
+import { Color, Ball, type BilliardContext } from "./BilliardContext";
 
 /**
- * 8-ball rules and gameplay.
+ * 2-player eight-ball rules and gameplay.
  */
-export class EightBall2P extends Middleware<ServerBilliardContext> {
+export class EightBall2P extends Middleware<BilliardContext> {
   constructor() {
     super();
     this.on("activate", this.handleActivate);
-    this.on("game-start", this.handleInitGame);
+    this.on("game-start", this.handleGameStart);
     this.on("shot-end", this.handleShotEnd);
   }
 
@@ -19,22 +18,21 @@ export class EightBall2P extends Middleware<ServerBilliardContext> {
     this.emit("rack-balls");
   }
 
-  handleInitGame() {
+  handleGameStart() {
     this.emit("init-cue-ball");
-    this.context.players[0].color = "striped";
-    this.context.players[1].color = "solid";
+    this.context.players[0].color = Color.stripe;
+    this.context.players[1].color = Color.solid;
   }
 
   handleShotEnd = (data: { pocketed: Ball[] }) => {
     const player = this.context.players.find((player) => player.turn === this.context.turn.current);
-    const color = player?.color;
 
-    const hasCueBall = data.pocketed.some((ball) => ball.color === Color.white);
-    const hasEightBall = data.pocketed.some((ball) => ball.color === Color.black);
-    const hasOwnBall = data.pocketed.some((ball) => ball.color.endsWith(color));
+    const hasCueBall = data.pocketed.some((ball) => Color.is(ball.color, Color.white));
+    const hasEightBall = data.pocketed.some((ball) => Color.is(ball.color, Color.black));
+    const hasOwnBall = data.pocketed.some((ball) => Color.is(ball.color, player?.color));
 
     if (hasEightBall) {
-      const ownBallLeft = this.context.balls.some((ball) => ball.color?.indexOf(color) > -1);
+      const ownBallLeft = this.context.balls.some((ball) => Color.is(ball.color, player?.color));
       const playerWin = !ownBallLeft;
       const winner = playerWin ? player : this.context.players.find((p) => p.id !== player.id);
       this.context.gameOver = true;
