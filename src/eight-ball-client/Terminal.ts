@@ -139,16 +139,41 @@ export class Terminal extends Middleware<BilliardContext> {
   ballDriver = Driver.create<Ball, Element>({
     filter: (data) => data.type == "ball",
     enter: (data) => {
-      const element = document.createElementNS(SVG_NS, "circle");
+      const element = document.createElementNS(SVG_NS, "image");
       element.classList.add("ball");
       element.classList.add(data.color);
-      element.setAttribute("r", String(data.radius - STROKE_WIDTH));
+      
+      // Set the image source based on ball color
+      let imageSrc = "";
+      switch(data.color) {
+        case "white":
+          imageSrc = "./assets/sprites/spr_ball2.png";
+          break;
+        case "black":
+          imageSrc = "./assets/sprites/spr_blackBall2.png";
+          break;
+        case "red":
+          imageSrc = "./assets/sprites/spr_redBall2.png";
+          break;
+        case "yellow":
+          imageSrc = "./assets/sprites/spr_yellowBall2.png";
+          break;
+        default:
+          imageSrc = "./assets/sprites/spr_ball2.png";
+      }
+      
+      element.setAttribute("href", imageSrc);
+      element.setAttribute("width", String(data.radius * 2));
+      element.setAttribute("height", String(data.radius * 2));
+      element.setAttribute("x", String(-data.radius));
+      element.setAttribute("y", String(-data.radius));
+      
       this.ballsGroup.appendChild(element);
       return element;
     },
     update: (data, element) => {
-      element.setAttribute("cx", String(data.position.x));
-      element.setAttribute("cy", String(data.position.y));
+      element.setAttribute("x", String(data.position.x - data.radius));
+      element.setAttribute("y", String(data.position.y - data.radius));
     },
     exit: (data, element) => {
       element.remove();
@@ -212,16 +237,40 @@ export class Terminal extends Middleware<BilliardContext> {
   cueDriver = Driver.create<CueStick, Element>({
     filter: (data) => data.type == "cue",
     enter: (data) => {
-      const element = document.createElementNS(SVG_NS, "line");
+      const element = document.createElementNS(SVG_NS, "image");
       element.classList.add("cue");
+      element.setAttribute("href", "./assets/sprites/spr_stick.png");
+      element.setAttribute("width", "70");
+      element.setAttribute("height", "16");
+      element.setAttribute("x", "0");
+      element.setAttribute("y", "-8"); // Center vertically
+      element.setAttribute("preserveAspectRatio", "none");
       this.cueGroup.appendChild(element);
       return element;
     },
     update: (data, element) => {
-      element.setAttribute("x1", String(data.start.x));
-      element.setAttribute("y1", String(data.start.y));
-      element.setAttribute("x2", String(data.end.x));
-      element.setAttribute("y2", String(data.end.y));
+      const stickLength = 70;
+      const stickHeight = 16;
+      // Vector from cue ball to pointer (drag direction)
+      const dx = data.start.x - data.end.x;
+      const dy = data.start.y - data.end.y;
+      const pullDist = Math.sqrt(dx * dx + dy * dy);
+      const dirX = dx / (pullDist || 1);
+      const dirY = dy / (pullDist || 1);
+      const gap = data.ball ? data.ball.radius : 10;
+      // The tip of the stick is just behind the cue ball, in the direction of the drag
+      const tipX = data.start.x + dirX * gap;
+      const tipY = data.start.y + dirY * gap;
+      // The base (butt) of the stick is further away in the same direction
+      const baseX = tipX + dirX * stickLength;
+      const baseY = tipY + dirY * stickLength;
+      // Place the image so its left edge (x) is at the base, and rotate toward the tip
+      const angle = Math.atan2(tipY - baseY, tipX - baseX) * 180 / Math.PI;
+      element.setAttribute("width", String(stickLength));
+      element.setAttribute("height", String(stickHeight));
+      element.setAttribute("x", String(baseX));
+      element.setAttribute("y", String(baseY - stickHeight / 2));
+      element.setAttribute("transform", `rotate(${angle} ${baseX} ${baseY})`);
     },
     exit: (data, element) => {
       element.remove();

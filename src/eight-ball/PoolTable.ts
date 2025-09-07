@@ -92,7 +92,7 @@ export class PoolTable extends Middleware<BilliardContext> {
           y: 0,
         },
         r,
-        Color.white,
+        "white"
       ),
     );
 

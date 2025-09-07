@@ -3,26 +3,382 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport"
-    content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="./style.css">
-  <meta name="theme-color" content="#323130" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#1a0f0a" />
   <meta name="color-scheme" content="dark" />
 </head>
 
 <body>
-  <svg id="polymatic-eight-ball" class="terminal"></svg>
-  <div style="position: absolute; top: 0.5em; left: 0.5em;">
-    <div id="game-status"></div>
-    <div id="room-status"></div>
+  <div class="casino-background">
+    <div class="casino-overlay"></div>
+    
+    <!-- Casino Header -->
+    <header class="casino-header">
+      <div class="casino-logo">
+        <div class="logo-icon">🎱</div>
+        <h1 class="casino-title">ROYAL EIGHT</h1>
+        <div class="casino-subtitle">Premium Pool Lounge</div>
+      </div>
+      <div class="casino-lights">
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+      </div>
+    </header>
+
+    <!-- Game Container -->
+    <div class="game-container">
+      <svg id="polymatic-eight-ball" class="terminal">
+        <defs>
+          <!-- Stripe Patterns - Fixed dimensions for proper ball size -->
+          <pattern id="yellow-stripe-pattern" patternUnits="userSpaceOnUse" width="0.008" height="0.008">
+            <rect width="0.008" height="0.008" fill="#ffdd00"/>
+            <rect x="0" y="0" width="0.004" height="0.008" fill="#ffffff"/>
+          </pattern>
+          
+          <pattern id="red-stripe-pattern" patternUnits="userSpaceOnUse" width="0.008" height="0.008">
+            <rect width="0.008" height="0.008" fill="#ff3300"/>
+            <rect x="0" y="0" width="0.004" height="0.008" fill="#ffffff"/>
+          </pattern>
+          
+          <pattern id="burgundy-stripe-pattern" patternUnits="userSpaceOnUse" width="0.008" height="0.008">
+            <rect width="0.008" height="0.008" fill="#662200"/>
+            <rect x="0" y="0" width="0.004" height="0.008" fill="#ffffff"/>
+          </pattern>
+          
+          <pattern id="orange-stripe-pattern" patternUnits="userSpaceOnUse" width="0.008" height="0.008">
+            <rect width="0.008" height="0.008" fill="#ff8800"/>
+            <rect x="0" y="0" width="0.004" height="0.008" fill="#ffffff"/>
+          </pattern>
+          
+          <pattern id="green-stripe-pattern" patternUnits="userSpaceOnUse" width="0.008" height="0.008">
+            <rect width="0.008" height="0.008" fill="#00bb11"/>
+            <rect x="0" y="0" width="0.004" height="0.008" fill="#ffffff"/>
+          </pattern>
+          
+          <pattern id="purple-stripe-pattern" patternUnits="userSpaceOnUse" width="0.008" height="0.008">
+            <rect width="0.008" height="0.008" fill="#9900ff"/>
+            <rect x="0" y="0" width="0.004" height="0.008" fill="#ffffff"/>
+          </pattern>
+          
+          <pattern id="blue-stripe-pattern" patternUnits="userSpaceOnUse" width="0.008" height="0.008">
+            <rect width="0.008" height="0.008" fill="#0077ff"/>
+            <rect x="0" y="0" width="0.004" height="0.008" fill="#ffffff"/>
+          </pattern>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Casino Status Panel -->
+    <div class="casino-status-panel">
+      <div class="status-card">
+        <div class="card-header">🏆 Game Status</div>
+        <div id="game-status" class="card-content">Ready to Play</div>
+      </div>
+      <div class="status-card">
+        <div class="card-header">🎪 Room Status</div>
+        <div id="room-status" class="card-content">Lobby</div>
+      </div>
+    </div>
+
+    <!-- Casino Control Panel -->
+    <div class="casino-controls">
+      <div class="control-panel">
+        <h3 class="panel-title">🎯 Game Options</h3>
+        <div class="button-grid">
+          <button id="play-offline" class="casino-btn primary">
+            <span class="btn-icon">🎮</span>
+            <span class="btn-text">Play Solo</span>
+            <span class="btn-subtitle">Practice Mode</span>
+          </button>
+          <button id="create-room" class="casino-btn secondary">
+            <span class="btn-icon">🏛️</span>
+            <span class="btn-text">Create Room</span>
+            <span class="btn-subtitle">Host a Game</span>
+          </button>
+          <button id="join-room" class="casino-btn tertiary">
+            <span class="btn-icon">🚪</span>
+            <span class="btn-text">Join Room</span>
+            <span class="btn-subtitle">Find Players</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative Elements -->
+    <div class="casino-decorations">
+      <div class="chip chip-1">💰</div>
+      <div class="chip chip-2">🎲</div>
+      <div class="chip chip-3">♠️</div>
+      <div class="chip chip-4">♦️</div>
+      <div class="floating-cards">
+        <div class="card">🃏</div>
+        <div class="card">🂡</div>
+        <div class="card">🂮</div>
+      </div>
+    </div>
   </div>
-  <div style="position: absolute; bottom: 0.5em; left: 0.5em;">
-    <button id="play-offline">Play Offline</button>
-    <button id="create-room">Create Room</button>
-    <button id="join-room">Join Room</button>  
-    <!-- <button id="leave-room">Leave Room</button> -->
-  </div>
+
   <script type="module" src="./src/client"></script>
+  <script>
+    // Cue stick control variables
+    let isAiming = false;
+    let aimingStartPos = { x: 0, y: 0 };
+    let cueAngle = 0;
+    let cuePower = 0;
+    let maxPower = 100;
+    let cueStick = null;
+    let aimingLine = null;
+    let powerIndicator = null;
+
+    // Initialize cue stick controls
+    function initializeCueControls() {
+      const terminal = document.querySelector('.terminal');
+      if (!terminal) return;
+
+      // Prevent default zoom behaviors
+      terminal.addEventListener('wheel', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      terminal.addEventListener('gesturestart', (e) => {
+        e.preventDefault();
+      });
+
+      terminal.addEventListener('gesturechange', (e) => {
+        e.preventDefault();
+      });
+
+      terminal.addEventListener('gestureend', (e) => {
+        e.preventDefault();
+      });
+
+      // Mouse controls for cue stick
+      terminal.addEventListener('mousedown', handleAimStart);
+      terminal.addEventListener('mousemove', handleAimMove);
+      terminal.addEventListener('mouseup', handleAimEnd);
+
+      // Touch controls for mobile
+      terminal.addEventListener('touchstart', handleTouchStart, { passive: false });
+      terminal.addEventListener('touchmove', handleTouchMove, { passive: false });
+      terminal.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+      // Prevent context menu
+      terminal.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+      });
+    }
+
+    function handleAimStart(e) {
+      e.preventDefault();
+      if (e.button !== 0) return; // Only left mouse button
+
+      isAiming = true;
+      const rect = e.target.getBoundingClientRect();
+      aimingStartPos = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+
+      document.querySelector('.game-container').classList.add('aiming');
+      showCueStick(aimingStartPos);
+    }
+
+    function handleAimMove(e) {
+      if (!isAiming) return;
+      e.preventDefault();
+
+      const rect = e.target.getBoundingClientRect();
+      const currentPos = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+
+      updateCueStick(aimingStartPos, currentPos);
+    }
+
+    function handleAimEnd(e) {
+      if (!isAiming) return;
+      e.preventDefault();
+
+      isAiming = false;
+      document.querySelector('.game-container').classList.remove('aiming');
+      
+      // Calculate shot power based on distance
+      const rect = e.target.getBoundingClientRect();
+      const endPos = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+
+      const distance = Math.sqrt(
+        Math.pow(endPos.x - aimingStartPos.x, 2) + 
+        Math.pow(endPos.y - aimingStartPos.y, 2)
+      );
+
+      cuePower = Math.min(distance / 2, maxPower);
+      
+      // Trigger shot
+      if (cuePower > 5) {
+        executeShot();
+      }
+
+      hideCueStick();
+    }
+
+    // Touch event handlers
+    function handleTouchStart(e) {
+      e.preventDefault();
+      if (e.touches.length !== 1) return;
+
+      const touch = e.touches[0];
+      const rect = e.target.getBoundingClientRect();
+      
+      isAiming = true;
+      aimingStartPos = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+
+      document.querySelector('.game-container').classList.add('aiming');
+      showCueStick(aimingStartPos);
+    }
+
+    function handleTouchMove(e) {
+      e.preventDefault();
+      if (!isAiming || e.touches.length !== 1) return;
+
+      const touch = e.touches[0];
+      const rect = e.target.getBoundingClientRect();
+      const currentPos = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+
+      updateCueStick(aimingStartPos, currentPos);
+    }
+
+    function handleTouchEnd(e) {
+      e.preventDefault();
+      if (!isAiming) return;
+
+      isAiming = false;
+      document.querySelector('.game-container').classList.remove('aiming');
+
+      if (e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0];
+        const rect = e.target.getBoundingClientRect();
+        const endPos = {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top
+        };
+
+        const distance = Math.sqrt(
+          Math.pow(endPos.x - aimingStartPos.x, 2) + 
+          Math.pow(endPos.y - aimingStartPos.y, 2)
+        );
+
+        cuePower = Math.min(distance / 2, maxPower);
+        
+        if (cuePower > 5) {
+          executeShot();
+        }
+      }
+
+      hideCueStick();
+    }
+
+    function showCueStick(pos) {
+      // This will be implemented by your game engine
+      // You'll need to create SVG elements for the cue stick
+      console.log('Show cue stick at:', pos);
+    }
+
+    function updateCueStick(startPos, currentPos) {
+      // Calculate angle and distance
+      const dx = currentPos.x - startPos.x;
+      const dy = currentPos.y - startPos.y;
+      cueAngle = Math.atan2(dy, dx);
+      
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      cuePower = Math.min(distance / 2, maxPower);
+
+      // Update cue stick visual position and rotation
+      console.log('Update cue stick - Angle:', cueAngle, 'Power:', cuePower);
+    }
+
+    function hideCueStick() {
+      console.log('Hide cue stick');
+    }
+
+    function executeShot() {
+      console.log('Execute shot with power:', cuePower, 'angle:', cueAngle);
+      // This will trigger the actual shot in your game
+    }
+
+    // Hide casino controls when game starts
+    function hideGameOptions() {
+      const casinoControls = document.querySelector('.casino-controls');
+      const gameContainer = document.querySelector('.game-container');
+      const terminal = document.querySelector('.terminal');
+      
+      if (casinoControls) {
+        casinoControls.classList.add('hidden');
+      }
+      if (gameContainer) {
+        gameContainer.classList.add('active');
+      }
+      if (terminal) {
+        terminal.classList.add('active');
+      }
+
+      // Initialize cue controls when game starts
+      setTimeout(initializeCueControls, 100);
+    }
+
+    // Show casino controls when returning to menu
+    function showGameOptions() {
+      const casinoControls = document.querySelector('.casino-controls');
+      const gameContainer = document.querySelector('.game-container');
+      const terminal = document.querySelector('.terminal');
+      
+      if (casinoControls) {
+        casinoControls.classList.remove('hidden');
+      }
+      if (gameContainer) {
+        gameContainer.classList.remove('active');
+      }
+      if (terminal) {
+        terminal.classList.remove('active');
+      }
+    }
+
+    // Add event listeners to buttons
+    document.addEventListener('DOMContentLoaded', function() {
+      const playOfflineBtn = document.getElementById('play-offline');
+      const createRoomBtn = document.getElementById('create-room');
+      const joinRoomBtn = document.getElementById('join-room');
+
+      if (playOfflineBtn) {
+        playOfflineBtn.addEventListener('click', hideGameOptions);
+      }
+      if (createRoomBtn) {
+        createRoomBtn.addEventListener('click', hideGameOptions);
+      }
+      if (joinRoomBtn) {
+        joinRoomBtn.addEventListener('click', hideGameOptions);
+      }
+
+      // Initialize immediately if no buttons are found (game already started)
+      if (!playOfflineBtn && !createRoomBtn && !joinRoomBtn) {
+        initializeCueControls();
+      }
+    });
+  </script>
 </body>
 
 </html>
